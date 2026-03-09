@@ -65,7 +65,7 @@ The Software may **NOT** be used, either directly or indirectly, by the followin
    - **Hamas**
    - **Houthi Movement (Ansar Allah)**
    - **Fraud syndicates and criminal organizations** operating in **Myanmar, Cambodia**, and other regions, including but not limited to telecom fraud groups, online gambling operations, human trafficking organizations, and their affiliated companies or entities
-   - Any entity designated as a **terrorist organization** by the **United Nations**, **European Union**, **United States**,  **People's Republic of China**,  ** Republic of Korea**,  **Singapore**
+   - Any entity designated as a **terrorist organization** by the **United Nations**, **European Union**, **United States**,  **People's Republic of China**,  **Republic of Korea**,  **Singapore**
    - Any organization, individual, or affiliated institution **controlled by the former Maduro and Chávez Venezuelan government** (due to rampant drug trafficking)
    - Any **Afghan Islamic cult personnel**, and any **Afghan government** or its **affiliated entities**
 
