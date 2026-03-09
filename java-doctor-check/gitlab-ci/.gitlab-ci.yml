@@ -1,0 +1,250 @@
+# This file is a template, and might need editing before it works on your project.
+# This is a sample GitLab CI/CD configuration file that should run without any modifications.
+# It demonstrates a basic 3 stage CI/CD pipeline. Instead of real tests or scripts,
+# it uses echo commands to simulate the pipeline execution.
+#
+# A pipeline is composed of independent jobs that run scripts, grouped into stages.
+# Stages run in sequential order, but jobs within stages run in parallel.
+#
+# For more information, see: https://docs.gitlab.com/ee/ci/yaml/index.html#stages
+#
+# You can copy and paste this template into a new `.gitlab-ci.yml` file.
+# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
+#
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
+
+stages: # List of stages for jobs, and their order of execution
+  - review
+
+mr-code-review:
+  stage: review
+  tags:
+    - amazon-q-dev
+  only:
+    - merge_requests
+  allow_failure: true
+  script:
+    - |
+      # 生成唯一ID
+      UNIQUE_ID=$(date +%s)_${CI_MERGE_REQUEST_IID}
+      DIFF_FILE="/tmp/${UNIQUE_ID}.diff"
+      
+      # 获取 MR 的源分支和目标分支
+      TARGET_BRANCH=${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}
+      SOURCE_BRANCH=${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
+      
+      echo "正在分析 MR #${CI_MERGE_REQUEST_IID}: ${SOURCE_BRANCH} -> ${TARGET_BRANCH}"
+      
+      # 获取目标分支的最新提交
+      git fetch origin ${TARGET_BRANCH}
+      
+      # 使用 CI 提供的 diff base SHA（更可靠）
+      if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA}" ]; then
+        echo "使用 CI_MERGE_REQUEST_DIFF_BASE_SHA: ${CI_MERGE_REQUEST_DIFF_BASE_SHA}"
+        git diff ${CI_MERGE_REQUEST_DIFF_BASE_SHA}..HEAD -- '**/*.java' '**/*.xml' '**/*.properties' '**/*.yml' '**/*.yaml' ':!target/**' ':!.idea/**' ':!*.iml' ':!.git/**' ':!logs/**' > ${DIFF_FILE}
+      else
+        echo "使用 origin/${TARGET_BRANCH} 作为基准"
+        # 使用两点语法比较分支
+        git diff origin/${TARGET_BRANCH}..HEAD -- '**/*.java' '**/*.xml' '**/*.properties' '**/*.yml' '**/*.yaml' ':!target/**' ':!.idea/**' ':!*.iml' ':!.git/**' ':!logs/**' > ${DIFF_FILE}
+      fi
+      
+      # 检查 diff 文件是否为空
+      if [ ! -s ${DIFF_FILE} ]; then
+        echo "没有检测到 Java/配置文件的变更"
+        exit 0
+      fi
+      
+      echo "Diff 文件已生成: ${DIFF_FILE}"
+      
+      # 获取项目根目录的绝对路径
+      PROJECT_ROOT=$(pwd)
+      echo "项目根目录: ${PROJECT_ROOT}"
+      
+      # 使用 q chat 分析代码变更（输出会包含 ANSI 颜色代码）
+      # 设置最大执行时间（秒）和文件读取限制
+      MAX_TIMEOUT=${AI_REVIEW_TIMEOUT:-300}
+      MAX_FILES=${AI_REVIEW_MAX_FILES:-20}
+      MAX_DEPTH=${AI_REVIEW_MAX_DEPTH:-2}
+      
+      REVIEW_OUTPUT_RAW=$(timeout ${MAX_TIMEOUT}s sudo -i q chat --trust-all-tools --no-interactive "你是一位资深的 Java 后端代码审查专家。
+
+      项目信息：
+      - 项目类型：Chief Trader X 项目（Maven 构建）
+      - 项目根目录：${PROJECT_ROOT}
+      - Git Diff 文件：${DIFF_FILE}
+      - 主要模块：trader-server、trader-client、 trader-code 、trader-domain
+
+      ⚠️ 重要限制（必须严格遵守）：
+      - 最多只能读取 ${MAX_FILES} 个额外的项目文件（不包括 diff 文件本身）
+      - 依赖追踪深度限制为 ${MAX_DEPTH} 层（只追踪直接引用的文件，不要递归追踪）
+      - 优先读取最关键的文件：接口定义、Service 实现、Controller、Entity/DTO 类
+      - 如果达到文件数量限制，停止读取更多文件，基于已有信息完成审查
+      - 禁止读取 target、.idea、.git、logs、node_modules 目录下的文件
+      - 忽略 logger 相关的引用查询（如 log.info、log.debug、System.out.println 等日志相关代码），不需要追踪其定义和实现
+
+      审查任务：
+      1. 首先读取 ${DIFF_FILE} 了解本次变更内容
+      2. 根据 diff 内容，有选择性地读取最相关的项目文件（注意文件数量限制）
+      3. 优先级：接口定义 > Service 实现 > Controller > Entity/DTO > 配置文件 > 其他引用
+      4. 在达到限制前完成审查，不要因为限制而中断输出
+      5. 请格外注意检查线程安全、事务管理和资源泄漏问题
+
+      审查维度：
+      1. 潜在 Bug 和错误
+         - 空指针异常（NullPointerException）风险
+         - 资源未关闭（数据库连接、文件流、HTTP 连接等）
+         - 异常处理不当（空 catch 块、吞异常、异常信息不明确）
+         - 并发问题（线程安全、死锁、竞态条件）
+         - SQL 注入风险
+         - 边界条件处理（空集合、空字符串、数值溢出）
+         - 资金、数量、价格计算错误（BigDecimal 使用不当
+         - 缺失幂等性（重复下单、重复回调、重复推送）
+         - 类型转换错误
+         - N+1 查询、循环内 DB / RPC
+         - 无界数据加载
+
+      2. 代码质量
+         - 代码可读性和可维护性
+         - 是否遵循 Java 编码规范和项目代码风格
+         - 重复代码和冗余逻辑
+         - 方法复杂度（圈复杂度过高）
+         - 命名规范（类名、方法名、变量名）
+         - 注释质量（是否必要、是否准确）
+
+      3. 安全性
+         - 敏感信息泄露（密码、密钥、Token 硬编码）
+         - SQL 注入、XSS 攻击防护
+         - 权限校验和认证
+         - 数据验证（输入参数校验）
+         - 敏感数据加密
+         - API 接口安全
+
+      4. 性能
+         - N+1 查询问题
+         - 大数据量处理（分页、批处理）
+         - 缓存使用（Redis、本地缓存）
+         - 数据库索引优化
+         - 不必要的对象创建
+         - 循环中的重复计算
+         - 连接池配置
+
+      5. Spring Boot 最佳实践
+         - Spring 注解使用（@Autowired、@Service、@Transactional、@Async 等）
+         - 事务管理（@Transactional 的正确使用、事务传播、隔离级别）
+         - RESTful API 设计（HTTP 方法、状态码、URL 设计）
+         - 分层架构（Controller、Service、Repository 职责分离）
+         - 依赖注入（构造器注入 vs 字段注入）
+         - 配置管理（application.yml、@ConfigurationProperties）
+         - 日志规范（日志级别、日志内容）
+         - 异常处理（全局异常处理、自定义异常）
+
+      输出格式：
+      ### 📋 审查摘要
+      [简要说明本次变更的主要内容]
+
+      ### ⚠️ 发现的问题
+      [列出发现的问题，按严重程度排序：🔴 严重 / 🟡 中等 / 🟢 轻微]
+
+      ### ✅ 做得好的地方
+      [列出值得肯定的改进]
+
+      ### 💡 优化建议
+      [提供具体的改进建议和代码示例]
+
+      ### 🎯 合并建议
+      [明确给出：✅ 建议合并 / ⚠️ 建议修改后合并 / ❌ 不建议合并，并说明理由]")
+      
+      # 去除 ANSI 转义码（颜色代码）
+      REVIEW_OUTPUT=$(echo "${REVIEW_OUTPUT_RAW}" | sed 's/\x1b\[[0-9;]*m//g')
+      
+      echo "代码审查结果:"
+      echo "${REVIEW_OUTPUT}"
+      
+      # 将审查结果保存到临时文件，避免转义问题
+      REVIEW_FILE="/tmp/${UNIQUE_ID}_review.txt"
+      echo "## 🤖 自动代码审查报告" > ${REVIEW_FILE}
+      echo "" >> ${REVIEW_FILE}
+      echo "${REVIEW_OUTPUT}" >> ${REVIEW_FILE}
+      echo "" >> ${REVIEW_FILE}
+      echo "---" >> ${REVIEW_FILE}
+      echo "*此评论由 GitLab CI 自动生成*" >> ${REVIEW_FILE}
+      
+      # 使用 jq 正确转义 JSON，避免特殊字符问题
+      COMMENT_JSON=$(jq -n --rawfile content ${REVIEW_FILE} '{body: $content}')
+      
+      # 构建 API URL
+      API_URL="http://16.162.217.191:8888/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/notes"
+      
+      echo "准备发送评论到 MR..."
+      echo "API URL: ${API_URL}"
+      
+      # 使用 GitLab API 添加评论并输出结果
+      echo "正在调用 GitLab API..."
+      CURL_RESPONSE=$(curl -w "\nHTTP_STATUS:%{http_code}" --request POST \
+        --header "PRIVATE-TOKEN: ${PC_GITLAB_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --data "${COMMENT_JSON}" \
+        "${API_URL}")
+      
+      echo "API 响应 :"
+      echo "${CURL_RESPONSE}"
+      
+      # 发送审查结果到飞书机器人
+      if [ -n "${LARK_BOT_REVIEW_IDS}" ]; then
+        echo "正在发送通知到飞书机器人..."
+        LARK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/${LARK_BOT_REVIEW_IDS}"
+      
+        # 构建飞书消息（使用 Markdown 格式）
+        MR_URL="${CI_PROJECT_URL}/-/merge_requests/${CI_MERGE_REQUEST_IID}"
+        LARK_MESSAGE=$(jq -n \
+          --arg title "🤖 代码审查报告 - MR #${CI_MERGE_REQUEST_IID}" \
+          --arg mr_info "**MR**: [${SOURCE_BRANCH} → ${TARGET_BRANCH}](${MR_URL})" \
+          --rawfile review ${REVIEW_FILE} \
+          '{
+            msg_type: "interactive",
+            card: {
+              header: {
+                title: {
+                  tag: "plain_text",
+                  content: $title
+                },
+                template: "blue"
+              },
+              elements: [
+                {
+                  tag: "markdown",
+                  content: $mr_info
+                },
+                {
+                  tag: "hr"
+                },
+                {
+                  tag: "markdown",
+                  content: $review
+                }
+              ]
+            }
+          }')
+      
+        echo "飞书消息内容:"
+        echo "${LARK_MESSAGE}"
+      
+        # 发送到飞书
+        LARK_RESPONSE=$(curl -w "\nHTTP_STATUS:%{http_code}" --request POST \
+          --header "Content-Type: application/json" \
+          --data "${LARK_MESSAGE}" \
+          "${LARK_URL}")
+      
+        echo "飞书 API 响应:"
+        echo "${LARK_RESPONSE}"
+      else
+        echo "未配置 LARK_BOT_REVIEW_IDS，跳过飞书通知"
+      fi
+      
+      # 清理临时文件
+      rm -f ${DIFF_FILE} ${REVIEW_FILE}
+      
+      echo "代码审查完成"
