@@ -1,4 +1,6 @@
 ---
+name: setup-mcp
+description: 快速安装mcp的skill
 inclusion: manual
 ---
 
