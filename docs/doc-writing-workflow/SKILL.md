@@ -1,5 +1,5 @@
 ---
-name: doc-writer
+name: doc-writer-workflow
 description: 专业技术文档写作与 Mermaid 图表生成，支持导出 HTML/PDF/DOCX 格式
 inclusion: manual
 ---
