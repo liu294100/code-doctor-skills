@@ -1,6 +1,6 @@
 ---
 name: doc-writer-workflow
-description: 专业技术文档写作与 Mermaid 图表生成，支持导出 HTML/PDF/DOCX 格式
+description: 专业技术文档写作与 Mermaid 图表生成，当需要生成 Markdown 文档时，遵循以下工作流，确保高效、一次成功
 inclusion: manual
 ---
 
