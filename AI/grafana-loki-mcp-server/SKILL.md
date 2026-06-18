@@ -2,7 +2,7 @@
 name: grafana-loki-logs
 description: "通过 Grafana Loki MCP Server 查询线上/测试环境日志，支持按服务名和关键词搜索、日志量统计、上下文日志获取、服务列表查询等，帮助开发者快速定位线上问题。当用户提到查日志、看日志、log、error、exception、线上报错、排查问题、Loki、Grafana 或具体服务名时激活。"
 inclusion: manual
------------------
+---
 
 # Grafana Loki 日志查询 Skill
 
