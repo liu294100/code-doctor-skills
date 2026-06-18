@@ -14,7 +14,7 @@ inclusion: manual
 
 ### 步骤 1：下载 server.py
 
-`ash
+`bash
 # 下载地址（直接保存到本地任意目录）
 https://raw.githubusercontent.com/liu294100/code-doctor-skills/refs/heads/main/AI/grafana-loki-mcp-server/server.py
 `
@@ -27,7 +27,7 @@ curl -o D:\dev\AI\grafana-loki-mcp-server\server.py https://raw.githubuserconten
 
 ### 步骤 2：安装依赖
 
-`ash
+`bash
 pip install mcp httpx
 `
 
