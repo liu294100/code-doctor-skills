@@ -19,6 +19,7 @@ from mcp.server.fastmcp import FastMCP
 # 配置
 GRAFANA_URL = os.environ.get("GRAFANA_URL", "https://grafana.stx365.com")
 GRAFANA_SESSION = os.environ.get("GRAFANA_SESSION", "")
+GRAFANA_TOKEN = os.environ.get("GRAFANA_TOKEN", "")
 GRAFANA_ORG_ID = os.environ.get("GRAFANA_ORG_ID", "5")
 LOKI_DATASOURCE_UID = os.environ.get("LOKI_DATASOURCE_UID", "ffkfi6twwk6wwf")
 LOKI_DATASOURCE_ID = int(os.environ.get("LOKI_DATASOURCE_ID", "6"))
@@ -28,15 +29,19 @@ mcp = FastMCP("grafana-loki")
 
 def _get_headers():
     """构建请求头"""
-    return {
+    headers = {
         "accept": "application/json, text/plain, */*",
         "content-type": "application/json",
         "x-datasource-uid": LOKI_DATASOURCE_UID,
         "x-grafana-org-id": GRAFANA_ORG_ID,
         "x-plugin-id": "loki",
         "x-cache-skip": "true",
-        "Cookie": f"grafana_session={GRAFANA_SESSION}",
     }
+    if GRAFANA_TOKEN:
+        headers["Authorization"] = f"Bearer {GRAFANA_TOKEN}"
+    else:
+        headers["Cookie"] = f"grafana_session={GRAFANA_SESSION}"
+    return headers
 
 
 def _parse_time_range(time_from: str, time_to: str) -> tuple[str, str]:
@@ -87,9 +92,6 @@ def _extract_log_lines(response_data: dict) -> list[dict]:
             values = data.get("values", [])
             if not values or len(values) < 3:
                 continue
-            # values[0] = labels array
-            # values[1] = timestamps array
-            # values[2] = log lines array
             labels_arr = values[0] if len(values) > 0 else []
             times_arr = values[1] if len(values) > 1 else []
             lines_arr = values[2] if len(values) > 2 else []
@@ -130,13 +132,11 @@ async def query_logs(
     """
     from_ms, to_ms = _parse_time_range(time_from, time_to)
 
-    # 构建 LogQL 表达式
     label_selector = f'service_name="{service_name}"'
     if extra_labels:
         label_selector += f", {extra_labels}"
     expr = "{" + label_selector + "}"
     if keyword:
-        # 支持多关键词用 | 分隔
         keywords = [k.strip() for k in keyword.split("|")]
         for kw in keywords:
             expr += f" |= `{kw}`"
@@ -171,7 +171,6 @@ async def query_logs(
     if not logs:
         return f"未查询到日志。\n查询表达式: {expr}\n时间范围: {time_from} ~ {time_to}"
 
-    # 格式化输出
     output_lines = [
         f"查询表达式: {expr}",
         f"时间范围: {time_from} ~ {time_to}",
@@ -256,7 +255,6 @@ async def query_logs_volume(
             return f"请求失败: HTTP {resp.status_code}\n{resp.text}"
         data = resp.json()
 
-    # 解析 volume 结果
     output_lines = [
         f"服务: {service_name}",
         f"关键词: {keyword or '(无)'}",
@@ -270,11 +268,9 @@ async def query_logs_volume(
             meta = frame.get("schema", {}).get("meta", {})
             for stat in meta.get("stats", []):
                 stats.append(f"  {stat['displayName']}: {stat['value']}")
-            # 提取 level 标签和数值
             fields = frame.get("schema", {}).get("fields", [])
             values = frame.get("data", {}).get("values", [])
             if len(values) >= 2:
-                # values[0] = timestamps, values[1] = counts
                 counts = values[1] if len(values) > 1 else []
                 level_label = ""
                 for f in fields:
@@ -317,8 +313,7 @@ async def query_log_context(
         目标时间点前后的日志内容
     """
     ts = int(timestamp_ms)
-    # 前后各扩展一段时间窗口来获取上下文
-    window_ms = 60000  # 前后各1分钟
+    window_ms = 60000
     from_ms = str(ts - window_ms)
     to_ms = str(ts + window_ms)
 
@@ -357,10 +352,8 @@ async def query_log_context(
     if not logs:
         return "未查询到上下文日志"
 
-    # 按时间排序
     logs.sort(key=lambda x: x.get("timestamp", 0) or 0)
 
-    # 找到最接近目标时间戳的日志
     target_idx = 0
     min_diff = float("inf")
     for i, log in enumerate(logs):
@@ -370,12 +363,10 @@ async def query_log_context(
             min_diff = diff
             target_idx = i
 
-    # 截取前后范围
     start = max(0, target_idx - before_lines)
     end = min(len(logs), target_idx + after_lines + 1)
     context_logs = logs[start:end]
 
-    # 格式化输出
     output_lines = [
         f"上下文日志 (目标时间: {timestamp_ms})",
         f"服务: {service_name}" + (f", Pod: {pod}" if pod else ""),
@@ -393,7 +384,6 @@ async def query_log_context(
         else:
             ts_str = "unknown"
         line = log.get("line", "")
-        # 标记目标行
         marker = ">>>" if (i + start) == target_idx else "   "
         output_lines.append(f"{marker} [{ts_str}] {line}")
 
