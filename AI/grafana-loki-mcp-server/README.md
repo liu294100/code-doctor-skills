@@ -1,175 +1,126 @@
-# Grafana Loki MCP Server
+# Grafana Loki MCP Server v2
 
-通过 Grafana API 代理查询 Loki 日志的 MCP Server，配合 Kiro / Claude 等 AI 工具实现自然语言查日志。
+通过 Grafana API 查询 Loki 日志的 MCP Server，专为 Kiro AI 设计。
 
-## 功能
+## 特性
 
-| 工具 | 功能 | 示例 |
-|------|------|------|
-| `query_logs` | 按服务名+关键词搜索日志 | "查 chief-toptrader-ae 最近的 error" |
-| `query_log_context` | 获取某条日志的前后上下文 | "看一下这条报错前后的日志" |
-| `query_logs_volume` | 日志量统计（按 level 分组） | "最近1小时 error 趋势" |
-| `list_services` | 列出所有可用服务名 | "有哪些服务可以查" |
-| `list_label_values` | 查询 label 的所有值 | "这个服务有哪些 pod" |
-| `query_logs_by_logql` | 直接用 LogQL 查询 | 高级用法 |
+- **自动登录**：配置账号密码后自动获取 session，无需手动粘贴 cookie
+- **自动刷新**：session 过期时自动重新登录，无需人工干预
+- **高效查询**：支持关键词搜索、时间范围、Pod/Level 过滤
+- **6 个工具**：日志查询、上下文、日志量统计、服务列表、Label 查询、LogQL 高级查询
 
-## 快速开始
+## 快速安装（30秒）
 
-### 1. 安装依赖
+### 方法一：直接下载（推荐）
 
-```bash
+**1. 下载 server.py：**
+
+`powershell
+# Windows PowerShell
+mkdir D:\dev\AI\grafana-loki-mcp-server
+curl -o D:\dev\AI\grafana-loki-mcp-server\server.py https://raw.githubusercontent.com/liu294100/code-doctor-skills/refs/heads/main/AI/grafana-loki-mcp-server/server.py
+`
+
+`ash
+# Mac/Linux
+mkdir -p ~/dev/AI/grafana-loki-mcp-server
+curl -o ~/dev/AI/grafana-loki-mcp-server/server.py https://raw.githubusercontent.com/liu294100/code-doctor-skills/refs/heads/main/AI/grafana-loki-mcp-server/server.py
+`
+
+下载地址：
+> https://raw.githubusercontent.com/liu294100/code-doctor-skills/refs/heads/main/AI/grafana-loki-mcp-server/server.py
+
+**2. 安装依赖：**
+
+`ash
 pip install mcp httpx
-```
+`
 
-或者：
+**3. 安装 Skill 文件（可选，让 AI 更聪明地使用工具）：**
 
-```bash
-pip install -r requirements.txt
-```
-
-### 2. 获取 Grafana Session
-
-1. 在浏览器登录你的 Grafana
-2. 打开 DevTools → Application → Cookies
-3. 复制 `grafana_session` 的值
-
-> 💡 如果你的 Grafana 支持 API Key / Service Account Token，
-> 建议改用 Token 方式（更稳定，不会过期），参见下方"高级配置"。
-
-### 3. 配置 MCP
-
-在 Kiro 的 `.kiro/settings/mcp.json` 中添加：
-
-```json
-{
-  "mcpServers": {
-    "grafana-loki": {
-      "command": "python",
-      "args": ["<下载路径>/grafana-loki-mcp-server/server.py"],
-      "env": {
-        "GRAFANA_URL": "https://your-grafana.com",
-        "GRAFANA_SESSION": "<your-grafana-session>",
-        "GRAFANA_ORG_ID": "1",
-        "LOKI_DATASOURCE_UID": "<your-loki-datasource-uid>",
-        "LOKI_DATASOURCE_ID": "1"
-      },
-      "disabled": false,
-      "autoApprove": [
-        "query_logs",
-        "query_logs_volume",
-        "query_log_context",
-        "list_services",
-        "list_label_values",
-        "query_logs_by_logql"
-      ]
-    }
-  }
-}
-```
-
-### 4. 获取 Loki Datasource 信息
-
-在 Grafana 中：
-- 进入 Connections → Data Sources → 找到你的 Loki 数据源
-- URL 中的 uid 就是 `LOKI_DATASOURCE_UID`
-- 或者在 Explore 页面的网络请求中查看 `x-datasource-uid` 头
-
-### 5. 安装 Skill（可选）
-
-将 `SKILL.md` 复制到 Kiro skills 目录：
-
-```bash
+`powershell
 # Windows
 mkdir %USERPROFILE%\.kiro\skills\grafana-loki-logs
-copy SKILL.md %USERPROFILE%\.kiro\skills\grafana-loki-logs\SKILL.md
+# 将 SKILL.md 复制到上面的目录
+`
 
-# macOS / Linux
-mkdir -p ~/.kiro/skills/grafana-loki-logs
-cp SKILL.md ~/.kiro/skills/grafana-loki-logs/SKILL.md
-```
+**4. 配置全局 MCP：**
 
-安装后，Kiro 会在你提到"查日志"、"看 error"等关键词时自动激活该 Skill。
+编辑 ~/.kiro/settings/mcp.json，在 mcpServers 中添加：
+
+`json
+"grafana-loki": {
+  "command": "python",
+  "args": ["D:/dev/AI/grafana-loki-mcp-server/server.py"],
+  "env": {
+    "GRAFANA_URL": "https://grafana.xxx.com",
+    "GRAFANA_USERNAME": "你的Grafana账号",
+    "GRAFANA_PASSWORD": "你的Grafana密码",
+    "GRAFANA_ORG_ID": "5",
+    "LOKI_DATASOURCE_UID": "ffkfi6twwk6wwf",
+    "LOKI_DATASOURCE_ID": "6"
+  },
+  "disabled": false,
+  "autoApprove": [
+    "query_logs", "query_logs_volume", "query_log_context",
+    "list_services", "list_label_values", "query_logs_by_logql"
+  ]
+}
+`
+
+> **注意**：rgs 路径改为你实际保存 server.py 的位置
+
+**5. 重启 MCP：** Kiro 命令面板 → 搜索 "MCP" → 重连
+
+### 方法二：运行安装脚本
+
+`ash
+# Windows - 双击运行
+install.bat
+`
 
 ---
 
-## 高级配置
-
-### 使用 API Token 替代 Session Cookie
-
-如果你的 Grafana 支持 Service Account：
-
-1. Grafana → Administration → Service Accounts → Create
-2. 创建 Token，赋予 Viewer 权限
-3. 修改环境变量：
-
-```json
-"env": {
-  "GRAFANA_URL": "https://your-grafana.com",
-  "GRAFANA_TOKEN": "glsa_xxxxxxxxxxxx",
-  "GRAFANA_ORG_ID": "1",
-  "LOKI_DATASOURCE_UID": "xxxxx",
-  "LOKI_DATASOURCE_ID": "1"
-}
-```
-
-然后修改 `server.py` 中的 `_get_headers()` 函数，将 Cookie 改为：
-```python
-"Authorization": f"Bearer {os.environ.get('GRAFANA_TOKEN', '')}",
-```
-
-### 环境变量说明
+## 环境变量说明
 
 | 变量 | 必填 | 说明 |
 |------|------|------|
-| GRAFANA_URL | ✅ | Grafana 地址，如 `https://grafana.example.com` |
-| GRAFANA_SESSION | ✅* | Grafana session cookie（与 TOKEN 二选一） |
-| GRAFANA_TOKEN | ✅* | Grafana API Token（与 SESSION 二选一） |
-| GRAFANA_ORG_ID | ❌ | 组织 ID，默认 "1" |
+| GRAFANA_URL | ✅ | Grafana 地址 |
+| GRAFANA_USERNAME | ✅* | 登录账号（与 PASSWORD 配对使用） |
+| GRAFANA_PASSWORD | ✅* | 登录密码 |
+| GRAFANA_ORG_ID | ✅ | 组织 ID |
 | LOKI_DATASOURCE_UID | ✅ | Loki 数据源 UID |
-| LOKI_DATASOURCE_ID | ✅ | Loki 数据源数字 ID |
+| LOKI_DATASOURCE_ID | ✅ | Loki 数据源 ID |
+| GRAFANA_SESSION | ❌ | 手动 session（配置了账号密码后不需要） |
+| GRAFANA_TOKEN | ❌ | API Token（优先级最高，配置后不走 session） |
 
----
+> *配置 USERNAME/PASSWORD 后系统自动登录和刷新，无需手动维护 session
+
+## 获取配置参数
+
+1. **GRAFANA_URL**: 你的 Grafana 访问地址
+2. **GRAFANA_ORG_ID**: 登录 Grafana → 左下角齿轮 → Organization → 看 URL 中的 orgId
+3. **LOKI_DATASOURCE_UID / ID**:
+   - 登录 Grafana → Explore 页面 → F12 打开 DevTools
+   - 随便查一次日志，在 Network 中找 ds/query 请求
+   - 看请求体中的 datasource.uid 和 datasourceId
 
 ## 使用示例
 
-配置完成后，直接在 Kiro 中用自然语言：
+在 Kiro Chat 中直接说：
 
-```
-帮我查一下 chief-toptrader-ae 最近15分钟的 error 日志
+- "查一下 chief-toptrader-ae 最近的 error 日志"
+- "看看 chief-ipo-server 最近1小时有没有 exception"
+- "这个服务最近什么时候重启的"
+- "查一下 chief-toptrader-ae 最近24小时的日志量"
 
-看一下 chief-ipo-server 今天10点到11点的 timeout 相关日志
+## 团队默认值（已预置）
 
-这条报错前后的日志帮我看看（自动调用 context）
+| 配置项 | 值 |
+|--------|-----|
+| GRAFANA_URL | https://grafana.stx365.com |
+| GRAFANA_ORG_ID | 5 |
+| LOKI_DATASOURCE_UID | ffkfi6twwk6wwf |
+| LOKI_DATASOURCE_ID | 6 |
 
-最近1小时 chief-toptrader-ae 的错误趋势怎么样
-```
-
----
-
-## 文件结构
-
-```
-grafana-loki-mcp-server/
-├── server.py           # MCP Server 主文件
-├── requirements.txt    # Python 依赖
-├── SKILL.md           # Kiro Skill 定义文件
-└── README.md          # 本文件
-```
-
----
-
-## 常见问题
-
-**Q: 提示 HTTP 401 Unauthorized？**
-A: Session 过期了，重新从浏览器获取 `grafana_session` cookie。
-
-**Q: 提示 HTTP 403 Forbidden？**
-A: 检查 `GRAFANA_ORG_ID` 是否正确，你的账号是否有该 Org 的访问权限。
-
-**Q: 查不到日志但 Grafana 页面能查到？**
-A: 确认 `LOKI_DATASOURCE_UID` 和 `LOKI_DATASOURCE_ID` 是否匹配。
-在 Grafana Explore 页面 F12 查看网络请求中的 `x-datasource-uid`。
-
-**Q: 如何找到 LOKI_DATASOURCE_ID？**
-A: 在 Grafana 中打开 Explore，F12 查看 `/api/ds/query` 请求的 payload，
-里面 `datasourceId` 字段就是数字 ID。
+团队成员只需要提供自己的 **Grafana 账号和密码** 即可完成配置。
