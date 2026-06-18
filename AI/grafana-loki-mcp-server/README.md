@@ -118,7 +118,7 @@ install.bat
 
 | 配置项 | 值 |
 |--------|-----|
-| GRAFANA_URL | https://grafana.stx365.com |
+| GRAFANA_URL | https://grafana.xxx.com |
 | GRAFANA_ORG_ID | 5 |
 | LOKI_DATASOURCE_UID | ffkfi6twwk6wwf |
 | LOKI_DATASOURCE_ID | 6 |
