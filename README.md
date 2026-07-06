@@ -1,6 +1,6 @@
 # Code Doctor Check — Kiro Skills Collection
 
-[🇨🇳 中文版](./README_zh.md)
+[zh 中文版](./README_zh.md)
 
 A developer-focused collection of Kiro AI Skills covering Java, Python, document processing, video generation, APM observability, and more. Provides comprehensive AI-assisted capabilities including code review, development guidance, architecture design, performance analysis, and packaging/deployment.
 
