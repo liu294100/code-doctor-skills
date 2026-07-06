@@ -1,99 +1,127 @@
-# Code Doctor Check — Kiro Skills 套件集合
+# Code Doctor Check — Kiro Skills Collection
 
-面向开发的 Kiro AI Skills 集合，覆盖 Java、Python、文档处理、视频生成等多个领域，提供代码审查、开发指导、架构设计、打包部署等全方位 AI 辅助能力。
+[🇨🇳 中文版](./README_zh.md)
 
-## 项目结构
+A developer-focused collection of Kiro AI Skills covering Java, Python, document processing, video generation, APM observability, and more. Provides comprehensive AI-assisted capabilities including code review, development guidance, architecture design, performance analysis, and packaging/deployment.
+
+## Project Structure
 
 ```
 code-doctor-check/
-├── java-doctor-check/          # Java 技术栈 Skills
+├── java-doctor-check/          # Java Tech Stack Skills
+│   ├── .kiro/skills/
+│   │   ├── 01-code-quality/    # Code Quality Review (Java/SQL/Spring Boot/MR)
+│   │   ├── 02-architecture/    # Architecture Design Review (FinTech/Brokerage)
+│   │   ├── 03-brokerage-business/  # Brokerage Business Systems (Trading/Capital)
+│   │   └── 04-techspec-templates/  # Technical Spec Document Templates
+│   ├── java-jprofiler-analyzer/    # JProfiler Deep Performance Analysis
+│   ├── java-memory-analyzer/       # Java Memory Analysis (MAT/jmap/jcmd)
+│   ├── javadecompiler/             # JAR Decompilation (CFR)
+│   ├── jadx-decompile/             # JADX Decompilation (APK/DEX/JAR)
+│   └── gitlab-ci/                  # GitLab CI/CD Config Templates
+│
+├── python-doctor-check/        # Python Tech Stack Skills
 │   └── .kiro/skills/
-│       ├── 01-code-quality/    # 代码质量审查（Java/SQL/Spring Boot/MR）
-│       ├── 02-architecture/    # 架构设计审查（金融/券商）
-│       ├── 03-brokerage-business/  # 券商业务系统专项（交易/资金）
-│       └── 04-techspec-templates/  # 技术方案文档生成模板
+│       ├── 01-python-sdk/      # Python SDK (Dev/Review/Package)
+│       ├── 02-flask/           # Flask Web App (Dev/Review/Deploy)
+│       └── 03-gui-toolkit/     # GUI Desktop Tools (Dev/Review/Package)
 │
-├── python-doctor-check/        # Python 技术栈 Skills
-│   └── .kiro/skills/
-│       ├── 01-python-sdk/      # Python SDK（开发/审查/打包）
-│       ├── 02-flask/           # Flask Web 应用（开发/审查/部署）
-│       └── 03-gui-toolkit/     # GUI 桌面小工具（开发/审查/打包）
+├── docs/                       # Document Processing Skills
+│   ├── docs-readers/           # Document Readers (PDF/PPT/Excel/Word/Image/JAR/APK)
+│   ├── ui-diagram-designer/    # UI Diagram Design
+│   ├── drawio-designer/        # DrawIO Diagram Design
+│   ├── drawio-xml-guide/       # DrawIO XML Writing Guide
+│   ├── read-drawio/            # DrawIO File Reader
+│   ├── doc-writer/             # Technical Document Writing
+│   ├── doc-writing-workflow/   # Efficient Document Writing Workflow
+│   └── Java_Version_Features_JDK1_to_JDK25.md  # Java Version Features Overview
 │
-├── docs/                       # 文档处理 Skills
-│   ├── docs-readers/           # 文档阅读器（PDF/PPT/Excel/Word/图片）
-│   ├── ui-diagram-designer/    # UI 图表设计
-│   ├── drawio-designer/        # DrawIO 图表设计
-│   ├── read-drawio/            # DrawIO 文件读取
-│   └── doc-writer/             # 技术文档写作
+├── video/                      # Video Generation Skills
+│   ├── html2video/             # HTML Template-Driven Video Generation
+│   └── browser-use-video/      # Browser Automation Video Generation
 │
-├── video/                      # 视频生成 Skills
-│   ├── html2video/             # HTML 模板驱动视频生成
-│   └── browser-use-video/      # 浏览器自动化视频生成
-│
-└── AI/                         # AI 工具配置
-    └── mcp/                    # MCP 服务器配置
+└── AI/                         # AI Tools & Configuration
+    ├── mcp/                    # MCP Server Configuration
+    │   ├── setup-mcp/          # MCP General Setup Guide
+    │   ├── setup-nacos2-mcp/   # Nacos 2.x MCP Setup
+    │   └── nacos2-mcp-server/  # Nacos 2.x MCP Server Implementation
+    ├── skywalking/             # SkyWalking APM Integration
+    │   ├── skywalking-mcp-server/    # SkyWalking MCP Server (Python)
+    │   └── skywalking-apm-mcp-go/    # SkyWalking MCP (Go, based on Apache OSS)
+    └── grafana-loki-mcp-server/      # Grafana Loki Log Query MCP Server
 ```
 
-## 技术栈覆盖
+## Tech Stack Coverage
 
-### Java（java-doctor-check）
+### Java (java-doctor-check)
 
-面向 Java 开发全链路 Skills，覆盖代码审查、架构设计、业务系统和技术方案文档生成。
+Full-chain Java development Skills covering code review, architecture design, business systems, performance analysis, and technical spec generation.
 
-| 分类 | Skills 数量 | 覆盖范围 |
-|------|-----------|---------|
-| 代码质量审查 | 5 | Java 代码规范、SQL 审查、Spring Boot SQL、MR 审查、GitLab 报告 |
-| 架构设计 | 2 | 互联网金融通用架构、券商整体架构 |
-| 业务系统 | 2 | 交易系统（港/美/A 股）、资金系统（保证金/融资/清算） |
-| 技术方案模板 | 3 | 港美股交易、期货期权衍生品、基金 IPO 债券 |
+| Category | Skills Count | Coverage |
+|----------|-------------|----------|
+| Code Quality Review | 5 | Java coding standards, SQL review, Spring Boot SQL, MR review, GitLab report |
+| Architecture Design | 2 | FinTech general architecture, Brokerage overall architecture |
+| Business Systems | 2 | Trading system (HK/US/A-share), Capital system (margin/financing/clearing) |
+| Tech Spec Templates | 3 | HK & US stock trading, futures & options derivatives, fund IPO bonds |
+| Performance Analysis | 2 | JProfiler full-stack profiling, Eclipse MAT memory analysis |
+| Decompilation Tools | 2 | CFR decompile JAR, JADX decompile APK/DEX/JAR |
+| CI/CD | 1 | GitLab CI/CD config templates |
 
-### Python（python-doctor-check）
+### Python (python-doctor-check)
 
-面向 Python 开发者的三大场景 Skills，每个场景均包含开发、审查、打包三个维度。
+Three scenario-based Skills for Python developers, each covering development, review, and packaging.
 
-| 分类 | Skills 数量 | 覆盖范围 |
-|------|-----------|---------|
-| Python SDK | 3 | 开发规范、代码审查、PyPI 打包发布 |
-| Flask Web | 3 | 开发指导、安全审查、Docker 部署 |
-| GUI 小工具 | 3 | 框架选型与开发、跨平台审查、PyInstaller 打包 |
+| Category | Skills Count | Coverage |
+|----------|-------------|----------|
+| Python SDK | 3 | Development standards, code review, PyPI packaging |
+| Flask Web | 3 | Development guidance, security review, Docker deployment |
+| GUI Tools | 3 | Framework selection & dev, cross-platform review, PyInstaller packaging |
 
-### 文档处理（docs）
+### Document Processing (docs)
 
-面向文档阅读、设计、写作的多功能 Skills 集合。
+Multi-purpose Skills for document reading, design, and writing.
 
-| 分类 | Skills 数量 | 覆盖范围 |
-|------|-----------|---------|
-| 文档阅读器 | 7 | PDF、PPT、Excel、Word、图片、JAR 反编译、APK 反编译 |
-| 设计工具 | 4 | UI 图表设计、DrawIO 设计与读取、文档写作 |
+| Category | Skills Count | Coverage |
+|----------|-------------|----------|
+| Document Readers | 7 | PDF, PPT, Excel, Word, Image, JAR decompile, APK decompile |
+| Design Tools | 4 | UI diagram design, DrawIO design & reading, DrawIO XML writing guide |
+| Document Writing | 2 | Technical document writing, efficient writing workflow |
+| Reference | 1 | Java version features overview (JDK 1.0 ~ JDK 25) |
 
-### 视频生成（video）
+### Video Generation (video)
 
-基于浏览器自动化和 HTML 渲染的视频生成 Skills。
+Browser automation and HTML rendering-based video generation Skills.
 
-| 分类 | Skills 数量 | 覆盖范围 |
-|------|-----------|---------|
-| 视频生成 | 2 | HTML 模板视频、浏览器自动化视频 |
+| Category | Skills Count | Coverage |
+|----------|-------------|----------|
+| Video Generation | 2 | HTML template video, browser automation video |
 
-### AI 工具配置（AI）
+### AI Tools & Observability (AI)
 
-AI 开发工具配置相关 Skills。
+AI development tool configuration and APM/log MCP Server integration.
 
-| 分类 | Skills 数量 | 覆盖范围 |
-|------|-----------|---------|
-| MCP 配置 | 1 | Model Context Protocol 服务器配置 |
+| Category | Skills Count | Coverage |
+|----------|-------------|----------|
+| MCP Configuration | 3 | MCP general setup, Nacos 2.x MCP setup, Nacos MCP Server |
+| SkyWalking APM | 2 | Python MCP Server (custom), Go MCP (based on Apache OSS) |
+| Grafana Loki | 1 | Log query MCP Server (search by service/keyword, context logs) |
 
-## 快速开始
+## Quick Start
 
-1. 将对应技术栈的文件夹复制到你的项目根目录
-2. 确保 `.kiro/skills/` 目录结构完整
-3. 在 Kiro 中打开项目，自动触发的 Skills 会在打开对应文件时生效
-4. 手动触发的 Skills 在聊天中使用 `#skill-name` 引用即可
+1. Copy the corresponding tech stack folder to your project root
+2. Ensure the `.kiro/skills/` directory structure is intact
+3. Open the project in Kiro — auto-triggered Skills activate when opening relevant files
+4. Manually triggered Skills can be invoked in chat using `#skill-name`
 
-## 许可证
+### MCP Server Setup
+
+For MCP Servers under the AI directory (SkyWalking, Loki, Nacos), refer to the SKILL.md or README.md in each directory for installation instructions, then add the corresponding Server in Kiro's MCP settings.
+
+## License
 
 MIT License
 
-🛑 **Additional Restriction / 附加使用限制：**
+🛑 **Additional Restriction:**
 
 The Software may **NOT** be used, either directly or indirectly, by the following entities or individuals:
 
@@ -104,10 +132,8 @@ The Software may **NOT** be used, either directly or indirectly, by the followin
    - **Hamas**
    - **Houthi Movement (Ansar Allah)**
    - **Fraud syndicates and criminal organizations** operating in **Myanmar, Cambodia**, and other regions, including but not limited to telecom fraud groups, online gambling operations, human trafficking organizations, and their affiliated companies or entities
-   - Any entity designated as a **terrorist organization** by the **United Nations**, **European Union**, **United States**,  **People's Republic of China**,  **Republic of Korea**,  **Singapore**
+   - Any entity designated as a **terrorist organization** by the **United Nations**, **European Union**, **United States**, **People's Republic of China**, **Republic of Korea**, **Singapore**
    - Any organization, individual, or affiliated institution **controlled by the former Maduro and Chávez Venezuelan government** (due to rampant drug trafficking)
    - Any **Afghan Islamic cult personnel**, and any **Afghan government** or its **affiliated entities**
 
 Any use by the aforementioned individuals or entities shall be deemed **unauthorized and in violation** of this license. We reserve the right to take legal action to the fullest extent permitted by applicable law.
-
-如违反本条款，使用行为将被视为**未经授权的侵权行为**，我们保留依法追究法律责任的权利
