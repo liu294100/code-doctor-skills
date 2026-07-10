@@ -1,4 +1,6 @@
 ---
+name: jadx-decompile
+description: Use JADX to decompile JAR/APK/DEX/AAR files. Especially good for Android apps. Supports CLI batch decompilation and GUI browsing.
 inclusion: manual
 ---
 
@@ -31,9 +33,10 @@ JADX 特别擅长 Android 相关文件（APK/DEX），同时也支持普通 JAR 
 ## 工具环境
 
 - 统一启动脚本：`D:/dev/tools/decompile.bat`
-  - 自动检测系统上的 Java 版本（支持 8/11/17/21）
-  - 优先使用高版本 Java，自动适配 JVM 参数
-- JADX CLI：`D:/dev/tools/jadx/bin/jadx.bat`（v1.4.7）
+  - 自动检测 JDK 8 ~ 25，优先高版本
+  - 根据 JDK 版本自动选择最佳 JADX 版本和 JVM 参数
+- JADX 安装目录：`D:/dev/tools/jadx/`
+- JADX CLI：`D:/dev/tools/jadx/bin/jadx.bat`
 - JADX GUI：`D:/dev/tools/jadx/bin/jadx-gui.bat`
 
 查看环境信息：
@@ -41,48 +44,125 @@ JADX 特别擅长 Android 相关文件（APK/DEX），同时也支持普通 JAR 
 D:/dev/tools/decompile.bat info
 ```
 
-### 工具下载（如未安装）
+---
 
-```bash
-# 1. 下载统一启动脚本 decompile.bat
-curl -L -o D:/dev/tools/decompile.bat https://raw.githubusercontent.com/liu294100/code-doctor-check/refs/heads/main/java-doctor-check/decompile.bat
+## JDK 与 JADX 版本兼容性
 
-# 2. 下载 JADX（Java 8 用 1.4.7，Java 11+ 用 1.5.5）
-# Java 8:
-curl -L -o D:/dev/tools/jadx.zip https://github.com/skylot/jadx/releases/download/v1.4.7/jadx-1.4.7.zip
-# Java 11+:
-curl -L -o D:/dev/tools/jadx.zip https://github.com/skylot/jadx/releases/download/v1.5.5/jadx-1.5.5.zip
-# 解压到 D:/dev/tools/jadx/
+| JDK 版本 | 推荐 JADX | 说明 |
+|:---------|:----------|:-----|
+| JDK 8 | 1.4.7 | JADX 最后一个支持 Java 8 的版本 |
+| JDK 11 | 1.5.5 | JADX 1.5.x 起最低要求 Java 11 |
+| JDK 17 | 1.5.5 | LTS，构建 JADX 源码要求 JDK 17+ |
+| JDK 21 | 1.5.5 | LTS，推荐 |
+| JDK 22-24 | 1.5.5 | 非 LTS，正常支持 |
+| JDK 25 | 1.5.5 | LTS，2025-09-16 GA，推荐 |
 
-# 3.（可选）下载 CFR 反编译器
-curl -L -o D:/dev/tools/cfr.jar https://github.com/leibnitz27/cfr/releases/download/0.152/cfr-0.152.jar
-```
+**JDK 25** 是最新的 LTS 版本（GA 2025-09-16），新增 Compact Object Headers、Scoped Values、Flexible Constructor Bodies 等特性。JADX 在该版本运行正常。
 
-> 注意：JADX 1.4.7 的 `jadx.bat` 中 `-XX:MaxRAMPercentage=70.0` 参数不兼容 Java 8，需手动删除该参数。
+> JADX 1.4.7 的 `jadx.bat` 中 `-XX:MaxRAMPercentage=70.0` 不兼容 Java 8，`decompile.bat` 会自动处理。
 
 ---
 
-## JADX vs CFR 选择指南
+## 工具下载
 
-| 场景 | 推荐工具 | 原因 |
-|------|---------|------|
-| 普通 Java JAR 反编译 | CFR（`#jar-decompile`） | 源码质量更高，Lambda/Stream 支持更好 |
-| Android APK 反编译 | JADX（本 skill） | 专为 Android 设计，支持资源文件解析 |
-| DEX 文件反编译 | JADX（本 skill） | 原生支持 DEX 格式 |
-| AAR 库反编译 | JADX（本 skill） | 支持 Android Archive 格式 |
-| 需要 GUI 浏览 | JADX GUI | 可视化浏览代码结构 |
-| 批量反编译整个 JAR | 两者都行 | JADX 输出目录结构更清晰 |
+```bash
+# 1. 下载统一启动脚本
+curl -L -o D:/dev/tools/decompile.bat https://raw.githubusercontent.com/liu294100/code-doctor-check/refs/heads/main/java-doctor-check/decompile.bat
+
+# 2. 下载 JADX（二选一）
+# Java 8：
+curl -L -o D:/dev/tools/jadx-1.4.7.zip https://github.com/skylot/jadx/releases/download/v1.4.7/jadx-1.4.7.zip
+# Java 11+（推荐）：
+curl -L -o D:/dev/tools/jadx-1.5.5.zip https://github.com/skylot/jadx/releases/download/v1.5.5/jadx-1.5.5.zip
+
+# 解压
+Expand-Archive -Path D:/dev/tools/jadx-1.5.5.zip -DestinationPath D:/dev/tools/jadx -Force
+
+# 3.（可选）CFR 反编译器
+curl -L -o D:/dev/tools/cfr.jar https://github.com/leibnitz27/cfr/releases/download/0.152/cfr-0.152.jar
+```
+
+多版本共存：
+```
+D:/dev/tools/
+├── decompile.bat       # 统一入口（自动选版本）
+├── jadx/               # 1.5.5（JDK 11+）
+├── jadx-1.4.7/         # 1.4.7（JDK 8 备用）
+└── cfr.jar
+```
 
 ---
 
 ## 支持的文件格式
 
-- `.apk` - Android 应用包
-- `.dex` - Dalvik 可执行文件
-- `.jar` - Java Archive
-- `.aar` - Android Archive
-- `.class` - Java 字节码文件
-- `.zip` - 包含上述文件的压缩包
+`.apk` `.dex` `.jar` `.class` `.aar` `.aab` `.xapk` `.apkm` `.smali` `.zip` `.arsc` `.jadx.kts`
+
+---
+
+## JADX CLI 完整参数（v1.5.5）
+
+### 常用参数
+
+| 参数 | 说明 |
+|:-----|:-----|
+| `-d, --output-dir` | 输出目录 |
+| `-ds, --output-dir-src` | 源码输出目录 |
+| `-dr, --output-dir-res` | 资源输出目录 |
+| `-r, --no-res` | 不反编译资源 |
+| `-s, --no-src` | 不反编译源码 |
+| `-j, --threads-count` | 线程数（默认 16） |
+| `-e, --export-gradle` | 导出为 Gradle 项目 |
+| `--show-bad-code` | 显示反编译失败的代码 |
+| `--deobf` | 启用反混淆 |
+| `--single-class <name>` | 只反编译指定类 |
+
+### 反编译模式
+
+| 参数值 | 说明 |
+|:-------|:-----|
+| `auto` | 自动选择最佳方式（默认） |
+| `restructure` | 还原代码结构（标准 Java） |
+| `simple` | 简化指令（线性，含 goto） |
+| `fallback` | 原始指令，不做修改 |
+
+用法：`--decompilation-mode restructure`
+
+### 反混淆参数
+
+| 参数 | 说明 |
+|:-----|:-----|
+| `--deobf` | 启用反混淆 |
+| `--deobf-min` | 最短名称长度，更短则重命名（默认 3） |
+| `--deobf-max` | 最长名称长度，更长则重命名（默认 64） |
+| `--mappings-path` | 映射文件路径（支持 Tiny/Enigma/ProGuard/SRG 等） |
+
+### 其他实用参数
+
+| 参数 | 说明 |
+|:-----|:-----|
+| `--no-imports` | 不使用 import，写全限定名 |
+| `--no-debug-info` | 不解析调试信息 |
+| `--no-inline-anonymous` | 不内联匿名类 |
+| `--escape-unicode` | 转义非 Latin 字符 |
+| `--output-format` | `java`（默认）或 `json` |
+| `--comments-level` | 注释级别：error/warn/info/debug/none |
+| `--log-level` | 日志级别：quiet/progress/error/warn/info/debug |
+| `--config <file>` | 从 JSON 配置文件加载选项 |
+| `--save-config <file>` | 保存当前选项为配置文件 |
+
+### 插件参数（-P）
+
+```bash
+# 跳过 dex 校验（处理损坏的 APK）
+-Pdex-input.verify-checksum=no
+
+# Java 字节码转换模式
+-Pjava-convert.mode=both   # dx/d8/both
+
+# Kotlin 元数据利用
+-Pkotlin-metadata.class-alias=yes
+-Pkotlin-metadata.method-args=yes
+```
 
 ---
 
@@ -91,202 +171,138 @@ curl -L -o D:/dev/tools/cfr.jar https://github.com/leibnitz27/cfr/releases/downl
 ### 第一步：确认输入参数
 
 从用户消息中提取：
-- **输入文件路径**（必须）：APK/JAR/DEX/AAR 文件路径
-- **输出目录**（可选）：反编译结果输出目录，默认 `/tmp/jadx-output`
-- **目标类名**（可选）：如果只想看某个类
-- **操作模式**：
-  - `cli` - 命令行反编译到目录（默认）
-  - `gui` - 打开 JADX GUI 可视化浏览
-  - `single` - 反编译后只查看指定类
+- **输入文件路径**（必须）
+- **输出目录**（可选，默认 `D:/tmp/jadx-output`）
+- **目标类名**（可选）
+- **操作模式**：`cli`（默认）/ `gui` / `single`
 
-### 第二步：验证输入文件
+### 第二步：CLI 反编译
 
 ```bash
-ls -la "<文件路径>"
-```
-
-### 第三步：CLI 反编译（整体反编译到目录）
-
-```bash
-# 基本用法：反编译到指定目录
+# 基本反编译
 D:/dev/tools/decompile.bat jadx -d "<输出目录>" "<输入文件>"
 
-# 常用参数组合
+# 完整参数（混淆 APK 推荐）
 D:/dev/tools/decompile.bat jadx -d "<输出目录>" --deobf --show-bad-code "<输入文件>"
+
+# 只反编译单个类
+D:/dev/tools/decompile.bat jadx --single-class "com.example.Target" --single-class-output "Target.java" "<输入文件>"
+
+# 跳过资源加速
+D:/dev/tools/decompile.bat jadx -d "<输出目录>" --no-res -j 8 "<输入文件>"
+
+# 导出为 Gradle 项目
+D:/dev/tools/decompile.bat jadx -e -d "<输出目录>" "<输入文件>"
 ```
 
-#### JADX CLI 常用参数
+### 第三步：查看结果
 
-| 参数 | 说明 |
-|------|------|
-| `-d <dir>` | 输出目录（必须） |
-| `--deobf` | 反混淆（对混淆过的代码有帮助） |
-| `--show-bad-code` | 即使反编译失败也显示代码（带注释标记） |
-| `--no-res` | 不反编译资源文件（加快速度） |
-| `--no-src` | 不反编译源码（只提取资源） |
-| `-e` | 导出为 Gradle 项目 |
-| `--threads-count <N>` | 线程数（默认 4） |
-| `-r` | 不解码资源（保持原始格式） |
-
-#### 反编译示例
-
-```bash
-# 反编译 APK（完整，含资源）
-D:/dev/tools/decompile.bat jadx -d /tmp/jadx-output/app --show-bad-code some-app.apk
-
-# 反编译 JAR（只要源码，不要资源）
-D:/dev/tools/decompile.bat jadx -d /tmp/jadx-output/lib --no-res some-lib.jar
-
-# 反编译混淆过的 APK
-D:/dev/tools/decompile.bat jadx -d /tmp/jadx-output/app --deobf --show-bad-code obfuscated.apk
-
-# 快速反编译（跳过资源）
-D:/dev/tools/decompile.bat jadx -d /tmp/jadx-output/quick --no-res --threads-count 8 large-app.apk
-```
-
-### 第四步：查看反编译结果
-
-反编译完成后，输出目录结构：
+输出目录结构：
 ```
 <输出目录>/
 ├── sources/           # Java 源码
-│   └── com/
-│       └── example/
-│           ├── MainActivity.java
-│           └── utils/
-│               └── Helper.java
-└── resources/         # 资源文件（APK 才有）
+│   └── com/example/
+│       ├── MainActivity.java
+│       └── utils/Helper.java
+└── resources/         # 资源（APK/AAR 才有）
     ├── AndroidManifest.xml
     ├── res/
     └── assets/
 ```
 
-#### 查看指定类
-
 ```bash
-# 反编译后，直接读取生成的 Java 文件
-# 类名 com.example.MyClass 对应路径 sources/com/example/MyClass.java
+# 查看指定类
+type "<输出目录>\sources\com\example\MyClass.java"
 
-cat "<输出目录>/sources/com/example/MyClass.java"
-```
-
-#### 搜索类
-
-```bash
-# 在反编译结果中搜索类
-find "<输出目录>/sources" -name "*.java" | grep -i "keyword"
+# 搜索类文件
+dir /s /b "<输出目录>\sources\*.java" | findstr /i "keyword"
 
 # 搜索代码内容
-grep -r "someMethod" "<输出目录>/sources/" --include="*.java"
+findstr /s /i "someMethod" "<输出目录>\sources\*.java"
 ```
 
-### 第五步：打开 JADX GUI（可视化浏览）
-
-如果用户想用 GUI 浏览：
+### 第四步：JADX GUI（可视化）
 
 ```bash
-# 打开 JADX GUI（会在新窗口中启动）
 D:/dev/tools/decompile.bat jadx-gui "<文件路径>"
 ```
 
-JADX GUI 功能：
-- 代码高亮和导航
-- 类/方法/字段搜索
-- 交叉引用查找
-- 反混淆
-- 导出为 Gradle 项目
+GUI 功能：代码高亮、跳转声明、查找引用、全文搜索、Smali 调试器、Frida hook 代码生成、反混淆、导出 Gradle 项目。
 
-提示用户：JADX GUI 已在新窗口中打开，可以在 GUI 中浏览代码。
-
-### 第六步：格式化输出
-
-对于 CLI 模式，读取反编译后的文件并展示：
+### 第五步：格式化输出
 
 ```
 🔍 JADX 反编译结果：com.example.MyClass
 ═══════════════════════════════════════════
 来源：some-app.apk
-工具：JADX 1.4.7
-输出目录：/tmp/jadx-output/
+工具：JADX 1.5.5
+输出目录：D:/tmp/jadx-output/
 ═══════════════════════════════════════════
 ```
-
-然后用 java 代码块展示源码内容。
 
 ---
 
 ## 常见场景
 
-### 场景一：反编译 Android APK
+### 反编译 Android APK
 
 ```bash
-# 完整反编译
-D:/dev/tools/decompile.bat jadx -d /tmp/jadx-output/myapp --show-bad-code D:/apk/myapp.apk
-
-# 查看 AndroidManifest.xml
-cat /tmp/jadx-output/myapp/resources/AndroidManifest.xml
-
-# 查看主 Activity
-cat /tmp/jadx-output/myapp/sources/com/example/myapp/MainActivity.java
+D:/dev/tools/decompile.bat jadx -d D:/tmp/jadx-output/myapp --show-bad-code D:/apk/myapp.apk
+type D:\tmp\jadx-output\myapp\resources\AndroidManifest.xml
 ```
 
-### 场景二：反编译 JAR 依赖
+### 反编译混淆 APK
 
 ```bash
-# 反编译 JAR（跳过资源处理，更快）
-D:/dev/tools/decompile.bat jadx -d /tmp/jadx-output/lib --no-res ~/.m2/repository/com/example/sdk/1.0/sdk-1.0.jar
-
-# 查看指定类
-cat /tmp/jadx-output/lib/sources/com/example/sdk/SomeService.java
+D:/dev/tools/decompile.bat jadx -d D:/tmp/jadx-output/app --deobf --show-bad-code obfuscated.apk
 ```
 
-### 场景三：反编译混淆代码
+### 反编译 JAR
 
 ```bash
-# 使用反混淆选项
-D:/dev/tools/decompile.bat jadx -d /tmp/jadx-output/deobf --deobf --show-bad-code obfuscated.apk
-
-# 查看反混淆映射
-ls /tmp/jadx-output/deobf/
+D:/dev/tools/decompile.bat jadx -d D:/tmp/jadx-output/lib --no-res some-lib.jar
 ```
 
-### 场景四：导出为可导入的项目
+### 只看单个类
 
 ```bash
-# 导出为 Gradle 项目，可以直接用 Android Studio 打开
-D:/dev/tools/decompile.bat jadx -e -d /tmp/jadx-project some-app.apk
+D:/dev/tools/decompile.bat jadx --single-class "com.example.Service" --single-class-output D:/tmp/Service.java app.apk
 ```
 
-### 场景五：只提取资源文件
+### 处理损坏的 APK
 
 ```bash
-# 只提取资源，不反编译代码
-D:/dev/tools/decompile.bat jadx -d /tmp/jadx-res --no-src some-app.apk
+D:/dev/tools/decompile.bat jadx -d D:/tmp/out --show-bad-code -Pdex-input.verify-checksum=no broken.apk
+```
+
+### 保存/复用配置
+
+```bash
+# 保存配置
+D:/dev/tools/decompile.bat jadx --save-config my-config -d out --deobf --show-bad-code app.apk
+# 复用配置
+D:/dev/tools/decompile.bat jadx --config my-config app.apk
 ```
 
 ---
 
-## 与 CFR 配合使用
+## JADX vs CFR 选择指南
 
-对于 JAR 文件，可以两个工具配合：
-- 先用 JADX 整体反编译到目录，浏览项目结构
-- 再用 CFR 精确反编译某个类，获得更高质量的源码
-
-```bash
-# 1. JADX 整体反编译，了解结构
-D:/dev/tools/decompile.bat jadx -d /tmp/jadx-output --no-res some.jar
-
-# 2. 找到感兴趣的类后，用 CFR 精确反编译
-D:/dev/tools/decompile.bat cfr some.jar "com.example.InterestingClass"
-```
+| 场景 | 推荐 | 原因 |
+|:-----|:-----|:-----|
+| Android APK/DEX/AAR/AAB | JADX | 原生支持，含资源解析 |
+| 普通 Java JAR | CFR（`#jar-decompile`） | 源码质量更高 |
+| 需要 GUI 浏览 | JADX GUI | 可视化 + 调试器 |
+| 需要 Frida Hook | JADX GUI | 内置 Frida snippet 生成 |
+| 混合使用 | 两者配合 | JADX 看结构，CFR 看细节 |
 
 ---
 
 ## 注意事项
 
-- JADX 反编译是整体操作，会反编译所有类到输出目录
-- 大型 APK 反编译可能需要较长时间和较多内存
-- 混淆过的代码即使反编译成功，可读性也较差，建议配合 `--deobf`
+- 大型 APK 反编译耗时较长，用 `--no-res` 跳过资源可加速
+- 混淆代码建议 `--deobf --show-bad-code` 组合
 - JADX GUI 需要图形界面环境
-- 当前安装的 JADX 1.4.7 兼容 Java 8+
-- 如果后续升级 Java 到 11+，可以升级 JADX 到最新版 1.5.5 获得更好的反编译效果
+- JDK 8 只能用 JADX 1.4.7，不支持 AAB/XAPK 等新格式
+- JDK 25（2025-09-16 GA，LTS）推荐作为运行环境
+- `decompile.bat` 自动处理版本检测和 JVM 参数适配
