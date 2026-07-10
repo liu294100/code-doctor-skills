@@ -7,13 +7,33 @@ REM  Supports: JDK 8/11/17/21/22/23/24/25
 REM  Tools:    JADX (1.4.7 for JDK 8, 1.5.5 for JDK 11+), CFR, javap
 REM ============================================================================
 
+REM ===== 用户配置区（按需修改）=====
+REM 指定 JAVA_HOME 路径，留空则自动检测系统中最高版本 JDK
+set "USER_JAVA_HOME="
+REM 示例：
+REM set "USER_JAVA_HOME=C:\Program Files\Java\jdk-25"
+REM set "USER_JAVA_HOME=D:\dev\Java\jdk-21"
+REM set "USER_JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17.0.12+7"
+REM ===== 配置区结束 =====
+
 set "TOOLS_DIR=%~dp0"
 set "CFR_JAR=%TOOLS_DIR%cfr.jar"
 set "JADX_HOME=%TOOLS_DIR%jadx"
 set "JADX_HOME_147=%TOOLS_DIR%jadx-1.4.7"
 set "JAVA_CMD="
 
-REM --- JDK Detection: highest version first (25 -> 8) ---
+REM --- 优先使用用户指定的 JAVA_HOME ---
+if defined USER_JAVA_HOME (
+    if exist "%USER_JAVA_HOME%\bin\java.exe" (
+        set "JAVA_CMD=%USER_JAVA_HOME%\bin\java.exe"
+        echo [INFO] Using user-configured JAVA_HOME: %USER_JAVA_HOME%
+        goto :found
+    ) else (
+        echo [WARN] USER_JAVA_HOME=%USER_JAVA_HOME% invalid, falling back to auto-detect
+    )
+)
+
+REM --- Auto-detect: highest version first (25 -> 8) ---
 for %%V in (25 24 23 22 21 17 11) do (
     if not defined JAVA_CMD (
         for %%P in (
@@ -54,7 +74,7 @@ if not defined JAVA_CMD (
     )
 )
 
-REM Fallback: JAVA_HOME -> PATH
+REM Fallback: system JAVA_HOME -> PATH
 if not defined JAVA_CMD if defined JAVA_HOME if exist "%JAVA_HOME%\bin\java.exe" set "JAVA_CMD=%JAVA_HOME%\bin\java.exe"
 if not defined JAVA_CMD (
     where java >nul 2>&1
@@ -62,11 +82,15 @@ if not defined JAVA_CMD (
 )
 
 if not defined JAVA_CMD (
-    echo [ERROR] Java not found. Please install JDK 8-25.
+    echo [ERROR] Java not found. Please either:
+    echo         1. Set USER_JAVA_HOME at the top of this script
+    echo         2. Install JDK 8-25 to a standard location
+    echo         3. Set system JAVA_HOME environment variable
     echo         Download: https://www.oracle.com/java/technologies/downloads/
     exit /b 1
 )
 
+:found
 REM --- Parse Java version ---
 for /f "usebackq tokens=3" %%v in (`"%JAVA_CMD%" -version 2^>^&1`) do (set "RAW=%%~v" & goto :parsed)
 :parsed
@@ -114,6 +138,7 @@ REM === Commands ===
 echo ============================================
 echo  Decompile Tool Environment
 echo ============================================
+echo  User JAVA_HOME: %USER_JAVA_HOME%
 echo  Java:    %JAVA_CMD%
 echo  Version: %RAW% (major=%MAJOR%)
 echo  JVM:     %JVM%
