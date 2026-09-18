@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "kafka-ui": {
+      "command": "python",
+      "args": ["D:\\xxx\\mcp\\kafka-ui-mcp-server\\server.py"],
+      "env": {
+        "KAFKA_UI_URL": "https://kafka-ui.test.xxx.com",
+        "KAFKA_UI_CLUSTER": "kafka-msk-test"
+      }
+    }
+  }
+}
