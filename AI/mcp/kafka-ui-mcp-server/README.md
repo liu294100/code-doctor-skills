@@ -35,7 +35,7 @@ pip install mcp httpx
       "command": "python",
       "args": ["D:/dev/AI/chief-trader-z-ai-tools/mcp/kafka-ui-mcp-server/server.py"],
       "env": {
-        "KAFKA_UI_URL": "https://kafka-ui.test.stx365.com",
+        "KAFKA_UI_URL": "https://kafka-ui.test.xxx.com",
         "KAFKA_UI_CLUSTER": "kafka-msk-test"
       }
     }
@@ -129,9 +129,9 @@ pip install mcp httpx
 ### 创建 minISR 测试 Topic
 
 ```
-create_topic topic_name="position-test-minISR-1" partitions=3 replication_factor=3 min_insync_replicas=1
-create_topic topic_name="position-test-minISR-2" partitions=3 replication_factor=3 min_insync_replicas=2
-create_topic topic_name="position-test-minISR-3" partitions=3 replication_factor=3 min_insync_replicas=3
+create_topic topic_name="abc-test-minISR-1" partitions=3 replication_factor=3 min_insync_replicas=1
+create_topic topic_name="abc-test-minISR-2" partitions=3 replication_factor=3 min_insync_replicas=2
+create_topic topic_name="abc-test-minISR-3" partitions=3 replication_factor=3 min_insync_replicas=3
 ```
 
 ### 批量创建
@@ -143,18 +143,18 @@ batch_create_topics topics_config='[{"name":"test-1","partitions":3,"replicas":3
 ### 发送测试消息
 
 ```
-produce_message topic_name="position-test-minISR-1" content='{"test":"message"}' key="test-key-001"
+produce_message topic_name="abc-test-minISR-1" content='{"test":"message"}' key="test-key-001"
 ```
 
 ### 消费消息
 
 ```
-consume_messages topic_name="position-test-minISR-1" limit=10
+consume_messages topic_name="abc-test-minISR-1" limit=10
 ```
 
 ## 基于的 API
 
-本 MCP Server 基于 Kafka UI REST API 实现，详见: [Kafka-UI-API接口文档.md](../../chief-trader-position/doc/design/Kafka-UI-API接口文档.md)
+本 MCP Server 基于 Kafka UI REST API 实现
 
 ## License
 
