@@ -1,10 +1,10 @@
 # Kafka UI API 接口文档
 
-> 基于 Kafka UI (https://kafka-ui.test.stx365.com) 抓取的 REST API 接口
+> 基于 Kafka UI (https://kafka-ui.test.xxx.com) 抓取的 REST API 接口
 
 ## 基础信息
 
-- **Base URL**: `https://kafka-ui.test.stx365.com/api`
+- **Base URL**: `https://kafka-ui.test.xxx.com/api`
 - **Content-Type**: `application/json`
 - **集群名称**: `kafka-msk-test`（测试环境）
 
@@ -79,7 +79,7 @@ Content-Type: application/json
 
 **cURL 示例**
 ```bash
-curl -X POST 'https://kafka-ui.test.stx365.com/api/clusters/kafka-msk-test/topics' \
+curl -X POST 'https://kafka-ui.test.xxx.com/api/clusters/kafka-msk-test/topics' \
   -H 'Content-Type: application/json' \
   -d '{
     "name": "position-test-minISR-1",
@@ -111,7 +111,7 @@ GET /api/clusters/{clusterName}/topics?page=1&perPage=25&showInternal=true&searc
 
 **cURL 示例**
 ```bash
-curl 'https://kafka-ui.test.stx365.com/api/clusters/kafka-msk-test/topics?page=1&perPage=25&showInternal=true'
+curl 'https://kafka-ui.test.xxx.com/api/clusters/kafka-msk-test/topics?page=1&perPage=25&showInternal=true'
 ```
 
 ---
@@ -144,7 +144,7 @@ GET /api/clusters/{clusterName}/topics/{topicName}
 
 **cURL 示例**
 ```bash
-curl 'https://kafka-ui.test.stx365.com/api/clusters/kafka-msk-test/topics/position-test-minISR-1'
+curl 'https://kafka-ui.test.xxx.com/api/clusters/kafka-msk-test/topics/position-test-minISR-1'
 ```
 
 ---
@@ -181,7 +181,7 @@ GET /api/clusters/{clusterName}/topics/{topicName}/config
 
 **cURL 示例**
 ```bash
-curl 'https://kafka-ui.test.stx365.com/api/clusters/kafka-msk-test/topics/position-test-minISR-1/config'
+curl 'https://kafka-ui.test.xxx.com/api/clusters/kafka-msk-test/topics/position-test-minISR-1/config'
 ```
 
 ---
@@ -198,7 +198,7 @@ DELETE /api/clusters/{clusterName}/topics/{topicName}
 
 **cURL 示例**
 ```bash
-curl -X DELETE 'https://kafka-ui.test.stx365.com/api/clusters/kafka-msk-test/topics/position-test-api-capture'
+curl -X DELETE 'https://kafka-ui.test.xxx.com/api/clusters/kafka-msk-test/topics/position-test-api-capture'
 ```
 
 ---
@@ -236,7 +236,7 @@ Content-Type: application/json
 
 **cURL 示例**
 ```bash
-curl -X POST 'https://kafka-ui.test.stx365.com/api/clusters/kafka-msk-test/topics/position-test-minISR-1/messages' \
+curl -X POST 'https://kafka-ui.test.xxx.com/api/clusters/kafka-msk-test/topics/position-test-minISR-1/messages' \
   -H 'Content-Type: application/json' \
   -d '{
     "partition": 0,
@@ -289,7 +289,7 @@ data:{"type":"DONE","consuming":{"bytesConsumed":88,"messagesConsumed":1}}
 
 **cURL 示例**
 ```bash
-curl 'https://kafka-ui.test.stx365.com/api/clusters/kafka-msk-test/topics/position-test-minISR-1/messages?keySerde=String&valueSerde=String&limit=100&seekType=BEGINNING' \
+curl 'https://kafka-ui.test.xxx.com/api/clusters/kafka-msk-test/topics/position-test-minISR-1/messages?keySerde=String&valueSerde=String&limit=100&seekType=BEGINNING' \
   -H 'Accept: text/event-stream'
 ```
 
@@ -306,7 +306,7 @@ GET /api/clusters
 
 **cURL 示例**
 ```bash
-curl 'https://kafka-ui.test.stx365.com/api/clusters'
+curl 'https://kafka-ui.test.xxx.com/api/clusters'
 ```
 
 ---
@@ -321,7 +321,7 @@ GET /api/clusters/{clusterName}/topic/{topicName}/serdes?use=DESERIALIZE
 
 **cURL 示例**
 ```bash
-curl 'https://kafka-ui.test.stx365.com/api/clusters/kafka-msk-test/topic/position-test-minISR-1/serdes?use=SERIALIZE'
+curl 'https://kafka-ui.test.xxx.com/api/clusters/kafka-msk-test/topic/position-test-minISR-1/serdes?use=SERIALIZE'
 ```
 
 ---
@@ -333,7 +333,7 @@ curl 'https://kafka-ui.test.stx365.com/api/clusters/kafka-msk-test/topic/positio
 ```bash
 #!/bin/bash
 
-BASE_URL="https://kafka-ui.test.stx365.com/api"
+BASE_URL="https://kafka-ui.test.xxx.com/api"
 CLUSTER="kafka-msk-test"
 
 # 创建测试 Topic 函数
@@ -371,7 +371,7 @@ echo "Done!"
 ```bash
 #!/bin/bash
 
-BASE_URL="https://kafka-ui.test.stx365.com/api"
+BASE_URL="https://kafka-ui.test.xxx.com/api"
 CLUSTER="kafka-msk-test"
 TOPICS=("position-test-minISR-1" "position-test-minISR-2" "position-test-minISR-3")
 
@@ -408,7 +408,7 @@ echo "Done!"
 ```bash
 #!/bin/bash
 
-BASE_URL="https://kafka-ui.test.stx365.com/api"
+BASE_URL="https://kafka-ui.test.xxx.com/api"
 CLUSTER="kafka-msk-test"
 TOPICS=("position-test-minISR-1" "position-test-minISR-2" "position-test-minISR-3")
 
