@@ -35,10 +35,10 @@ pip install mcp httpx
       "command": "python",
       "args": ["D:/dev/AI/chief-trader-z-ai-tools/mcp/nacos3-mcp-server/server.py"],
       "env": {
-        "NACOS_HOST": "172.33.149.111",
+        "NACOS_HOST": "127.0.0.1",
         "NACOS_PORT": "8080",
         "NACOS_USERNAME": "nacos",
-        "NACOS_PASSWORD": "nacos2024",
+        "NACOS_PASSWORD": "nacos",
         "NO_PROXY": "*",
         "HTTP_PROXY": "",
         "HTTPS_PROXY": ""
