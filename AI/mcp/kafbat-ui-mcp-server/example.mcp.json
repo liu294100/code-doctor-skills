@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "kafbat-ui": {
+      "command": "python",
+      "args": ["D:\\dev\\AI\\mcp\\kafbat-ui-mcp-server\\server.py"],
+      "env": {
+        "KAFBAT_UI_URL": "https://kafka-ui-v2.test.xxx.com",
+        "KAFBAT_UI_USERNAME": "admin",
+        "KAFBAT_UI_PASSWORD": "kafka-ui",
+        "KAFBAT_UI_CLUSTER": "kafka-msk-test",
+        "NO_PROXY": "*",
+        "HTTP_PROXY": "",
+        "HTTPS_PROXY": ""
+      }
+    }
+  }
+}
