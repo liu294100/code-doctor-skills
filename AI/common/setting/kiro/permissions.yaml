@@ -1,0 +1,807 @@
+rules:
+  # ========== 危险命令 - 始终询问 ==========
+  - capability: shell
+    match:
+      # 递归删除
+      - rm -rf *
+      - rm -r -f *
+      - rm -fr *
+      - Remove-Item*-Recurse*-Force*
+      - rmdir /s /q *
+      - rmdir /s*
+      - del /f /s /q *
+      - del /f /s *
+      - rd /s /q *
+      # Git 危险操作
+      - git push*--force*
+      - git push*-f
+      - git push * --force*
+      - git push * -f
+      - git reset --hard*
+      - git clean -fd*
+      - git clean -f*
+      - git branch -D *
+      - git checkout --orphan*
+      - git filter-branch*
+      - git rebase*--force*
+      # 数据库危险操作
+      - drop table*
+      - drop database*
+      - truncate table*
+      - DELETE FROM*WHERE 1*
+      - DELETE FROM*WHERE true*
+      # 系统危险操作
+      - format *:*
+      - shutdown*
+      - reboot*
+      - halt*
+      - poweroff*
+      - init 0*
+      - init 6*
+      - mkfs*
+      - dd if=*
+      - ":>/*"
+      - "> /*"
+      # 权限危险操作
+      - chmod -R 777*
+      - chmod 777 /*
+      - chown -R*/*
+      # 远程执行危险
+      - "curl*| bash*"
+      - "curl*| sh*"
+      - "wget*| bash*"
+      - "wget*| sh*"
+      - "curl*|bash*"
+      - "curl*|sh*"
+      # 包管理危险操作
+      - npm unpublish*
+      - pip uninstall*-y*
+      - gem uninstall*-a*
+      # 容器/K8s 危险操作
+      - docker system prune*-a*
+      - docker volume prune*-f*
+      - docker container prune*-f*
+      - docker image prune*-a*
+      - docker rm*-f*
+      - docker rmi*-f*
+      - kubectl delete*--all*
+      - kubectl delete namespace*
+      - kubectl delete ns *
+      # 服务管理危险操作
+      - systemctl stop*
+      - systemctl disable*
+      - systemctl mask*
+      - service * stop*
+      # 网络/防火墙危险操作
+      - iptables -F*
+      - iptables -X*
+      - ufw disable*
+      - firewall-cmd*--remove*
+      # Windows 注册表危险操作
+      - reg delete*
+      - registry delete*
+      - Remove-ItemProperty*
+      # 环境变量危险操作
+      - setx*PATH*
+      - "[Environment]::SetEnvironmentVariable*Machine*"
+    effect: ask
+
+  # ========== 常用开发命令 - 自动允许 ==========
+  - capability: shell
+    match:
+      # === 版本控制 ===
+      - git *
+      - svn *
+      - hg *
+
+      # === Java 生态 ===
+      - java *
+      - javac *
+      - javap *
+      - javadoc *
+      - jar *
+      - jps *
+      - jstack *
+      - jmap *
+      - jstat *
+      - jcmd *
+      - jinfo *
+      - jhat *
+      - jconsole *
+      - jvisualvm *
+      - mvn *
+      - mvnw *
+      - ./mvnw *
+      - .\mvnw *
+      - mvnd *
+      - gradle *
+      - gradlew *
+      - ./gradlew *
+      - .\gradlew *
+      - ant *
+      - sbt *
+      - lein *
+      - scala *
+      - scalac *
+      - kotlin *
+      - kotlinc *
+
+      # === Python 生态 ===
+      - python *
+      - python3 *
+      - python2 *
+      - py *
+      - pip *
+      - pip3 *
+      - pipx *
+      - pipenv *
+      - poetry *
+      - conda *
+      - mamba *
+      - virtualenv *
+      - venv *
+      - pytest *
+      - pylint *
+      - flake8 *
+      - black *
+      - isort *
+      - mypy *
+      - pyright *
+      - ruff *
+      - bandit *
+      - sphinx-build *
+      - uvicorn *
+      - gunicorn *
+      - uvx *
+      - uv *
+      - pdm *
+      - hatch *
+      - tox *
+      - nox *
+      - jupyter *
+      - ipython *
+
+      # === Node.js / JavaScript / TypeScript ===
+      - node *
+      - npm *
+      - npx *
+      - yarn *
+      - pnpm *
+      - bun *
+      - bunx *
+      - deno *
+      - tsc *
+      - ts-node *
+      - tsx *
+      - esbuild *
+      - swc *
+      - babel *
+      - eslint *
+      - prettier *
+      - biome *
+      - jest *
+      - vitest *
+      - mocha *
+      - karma *
+      - cypress *
+      - playwright *
+      - puppeteer *
+      - vite *
+      - webpack *
+      - rollup *
+      - parcel *
+      - turbo *
+      - nx *
+      - lerna *
+      - gulp *
+      - grunt *
+      - node_modules\.bin\* *
+      - node_modules/.bin/* *
+
+      # === Go ===
+      - go *
+      - gofmt *
+      - golint *
+      - gopls *
+      - gotest *
+      - govulncheck *
+
+      # === Rust ===
+      - cargo *
+      - rustc *
+      - rustfmt *
+      - clippy *
+      - rustup *
+
+      # === .NET / C# ===
+      - dotnet *
+      - nuget *
+      - msbuild *
+      - csc *
+
+      # === Ruby ===
+      - ruby *
+      - gem *
+      - bundle *
+      - bundler *
+      - rails *
+      - rake *
+      - rspec *
+      - rubocop *
+      - irb *
+      - pry *
+
+      # === PHP ===
+      - php *
+      - composer *
+      - artisan *
+      - phpunit *
+      - phpstan *
+      - psalm *
+
+      # === C/C++ ===
+      - gcc *
+      - g++ *
+      - clang *
+      - clang++ *
+      - make *
+      - cmake *
+      - ninja *
+      - ccache *
+      - gdb *
+      - lldb *
+      - valgrind *
+
+      # === Swift / iOS / macOS ===
+      - swift *
+      - swiftc *
+      - xcodebuild *
+      - xcrun *
+      - pod *
+      - fastlane *
+
+      # === Dart / Flutter ===
+      - dart *
+      - flutter *
+      - pub *
+
+      # === Elixir / Erlang ===
+      - elixir *
+      - mix *
+      - iex *
+      - erl *
+      - rebar3 *
+
+      # === Haskell ===
+      - ghc *
+      - ghci *
+      - cabal *
+      - stack *
+
+      # === Lua ===
+      - lua *
+      - luac *
+      - luarocks *
+
+      # === Perl ===
+      - perl *
+      - cpan *
+      - cpanm *
+
+      # === R ===
+      - R *
+      - Rscript *
+
+      # === Shell / Scripting ===
+      - bash *
+      - sh *
+      - zsh *
+      - fish *
+      - pwsh *
+      - powershell *
+
+      # === Docker / 容器 ===
+      - docker *
+      - docker-compose *
+      - podman *
+      - buildah *
+      - skopeo *
+      - crictl *
+      - nerdctl *
+
+      # === Kubernetes ===
+      - kubectl *
+      - helm *
+      - kustomize *
+      - k9s *
+      - kubectx *
+      - kubens *
+      - minikube *
+      - kind *
+      - k3s *
+      - k3d *
+      - stern *
+      - lens *
+      - argocd *
+      - istioctl *
+      - linkerd *
+
+      # === 云平台 CLI ===
+      - aws *
+      - az *
+      - gcloud *
+      - firebase *
+      - vercel *
+      - netlify *
+      - heroku *
+      - flyctl *
+      - doctl *
+      - linode-cli *
+      - vultr-cli *
+      - oci *
+      - aliyun *
+      - coscmd *
+      - ossutil *
+
+      # === IaC / DevOps ===
+      - terraform *
+      - terragrunt *
+      - pulumi *
+      - ansible *
+      - ansible-playbook *
+      - vagrant *
+      - packer *
+      - consul *
+      - vault *
+      - nomad *
+      - chef *
+      - puppet *
+      - salt *
+
+      # === 数据库客户端 ===
+      - mysql *
+      - mysqldump *
+      - psql *
+      - pg_dump *
+      - pg_restore *
+      - mongo *
+      - mongosh *
+      - mongodump *
+      - mongorestore *
+      - redis-cli *
+      - sqlite3 *
+      - sqlcmd *
+      - bcp *
+      - cqlsh *
+      - influx *
+      - clickhouse-client *
+
+      # === 消息队列 / 中间件 ===
+      - kafka-* *
+      - rabbitmqctl *
+      - etcdctl *
+      - zookeeper-* *
+
+      # === API / HTTP 工具 ===
+      - curl *
+      - wget *
+      - http *
+      - httpie *
+      - httpx *
+      - hurl *
+      - grpcurl *
+      - postman *
+
+      # === 网络工具 ===
+      - ping *
+      - traceroute *
+      - tracert *
+      - nslookup *
+      - dig *
+      - host *
+      - whois *
+      - netstat *
+      - ss *
+      - ip *
+      - ifconfig *
+      - ipconfig *
+      - arp *
+      - route *
+      - nmap *
+      - tcpdump *
+      - wireshark *
+      - nc *
+      - netcat *
+      - telnet *
+      - ssh *
+      - scp *
+      - sftp *
+      - rsync *
+      - ftp *
+
+      # === 文件操作 ===
+      - ls *
+      - dir *
+      - ll *
+      - la *
+      - tree *
+      - cd *
+      - pwd *
+      - cat *
+      - type *
+      - head *
+      - tail *
+      - less *
+      - more *
+      - bat *
+      - echo *
+      - printf *
+      - touch *
+      - mkdir *
+      - cp *
+      - copy *
+      - mv *
+      - move *
+      - rm *
+      - del *
+      - rmdir *
+      - ln *
+      - mklink *
+      - find *
+      - fd *
+      - locate *
+      - which *
+      - where *
+      - whereis *
+      - file *
+      - stat *
+      - du *
+      - df *
+      - mount *
+      - umount *
+
+      # === 文本处理 ===
+      - grep *
+      - rg *
+      - ripgrep *
+      - ag *
+      - ack *
+      - sed *
+      - awk *
+      - gawk *
+      - cut *
+      - sort *
+      - uniq *
+      - wc *
+      - tr *
+      - diff *
+      - patch *
+      - comm *
+      - join *
+      - paste *
+      - expand *
+      - unexpand *
+      - fold *
+      - fmt *
+      - pr *
+      - column *
+      - jq *
+      - yq *
+      - xq *
+      - xmllint *
+      - csvtool *
+      - miller *
+      - dasel *
+
+      # === 压缩/解压 ===
+      - tar *
+      - zip *
+      - unzip *
+      - gzip *
+      - gunzip *
+      - bzip2 *
+      - bunzip2 *
+      - xz *
+      - unxz *
+      - 7z *
+      - 7za *
+      - rar *
+      - unrar *
+      - zstd *
+      - lz4 *
+
+      # === 进程管理 ===
+      - ps *
+      - top *
+      - htop *
+      - btop *
+      - kill *
+      - pkill *
+      - killall *
+      - pgrep *
+      - nice *
+      - renice *
+      - nohup *
+      - disown *
+      - bg *
+      - fg *
+      - jobs *
+      - wait *
+      - timeout *
+      - time *
+      - watch *
+      - xargs *
+      - parallel *
+
+      # === 系统信息 ===
+      - uname *
+      - hostname *
+      - whoami *
+      - id *
+      - groups *
+      - uptime *
+      - date *
+      - cal *
+      - timedatectl *
+      - locale *
+      - env *
+      - printenv *
+      - export *
+      - set *
+      - unset *
+      - source *
+      - . *
+      - alias *
+      - unalias *
+      - history *
+      - clear *
+      - cls *
+      - reset *
+      - tput *
+      - stty *
+      - tty *
+      - free *
+      - vmstat *
+      - iostat *
+      - mpstat *
+      - sar *
+      - dmesg *
+      - lscpu *
+      - lsmem *
+      - lspci *
+      - lsusb *
+      - lsblk *
+      - blkid *
+      - fdisk -l *
+      - hwinfo *
+      - inxi *
+
+      # === 用户/权限 (非危险) ===
+      - chmod *
+      - chown *
+      - chgrp *
+      - umask *
+      - getfacl *
+      - setfacl *
+      - passwd *
+      - su *
+      - sudo *
+
+      # === 编辑器/IDE ===
+      - vim *
+      - vi *
+      - nvim *
+      - nano *
+      - emacs *
+      - code *
+      - code-insiders *
+      - subl *
+      - atom *
+      - idea *
+      - webstorm *
+      - pycharm *
+      - goland *
+      - rider *
+      - clion *
+      - datagrip *
+      - notepad *
+      - notepad++ *
+
+      # === 版本检查 ===
+      - "*--version"
+      - "*-version"
+      - "*-v"
+      - "* --version"
+      - "* -version"
+      - "* -v"
+      - "* --help"
+      - "* -h"
+      - "* -?"
+      - "* help"
+      - man *
+      - info *
+      - tldr *
+
+      # === 终端复用 ===
+      - screen *
+      - tmux *
+      - byobu *
+
+      # === 下载工具 ===
+      - aria2c *
+      - axel *
+      - youtube-dl *
+      - yt-dlp *
+
+      # === Git LFS / 大文件 ===
+      - git-lfs *
+      - dvc *
+
+      # === 代码质量/安全 ===
+      - sonar-scanner *
+      - snyk *
+      - trivy *
+      - grype *
+      - syft *
+      - cosign *
+      - semgrep *
+      - codeql *
+      - hadolint *
+      - shellcheck *
+      - yamllint *
+      - jsonlint *
+      - markdownlint *
+      - checkov *
+      - tfsec *
+      - terrascan *
+
+      # === 性能/调试 ===
+      - perf *
+      - strace *
+      - ltrace *
+      - dtrace *
+      - bpftrace *
+      - flamegraph *
+      - heaptrack *
+      - massif-visualizer *
+
+      # === PowerShell 命令 ===
+      - Get-* *
+      - Set-* *
+      - New-* *
+      - Add-* *
+      - Remove-* *
+      - Clear-* *
+      - Copy-* *
+      - Move-* *
+      - Rename-* *
+      - Test-* *
+      - Select-* *
+      - Where-* *
+      - ForEach-* *
+      - Sort-* *
+      - Group-* *
+      - Measure-* *
+      - Compare-* *
+      - Format-* *
+      - Export-* *
+      - Import-* *
+      - ConvertTo-* *
+      - ConvertFrom-* *
+      - Out-* *
+      - Write-* *
+      - Read-* *
+      - Invoke-* *
+      - Start-* *
+      - Stop-* *
+      - Wait-* *
+      - Enter-* *
+      - Exit-* *
+      - Enable-* *
+      - Disable-* *
+      - Show-* *
+      - Hide-* *
+      - Open-* *
+      - Close-* *
+      - Save-* *
+      - Undo-* *
+      - Redo-* *
+      - Register-* *
+      - Unregister-* *
+      - Install-* *
+      - Uninstall-* *
+      - Update-* *
+      - Publish-* *
+      - Unpublish-* *
+      - Find-* *
+      - Search-* *
+      - Resolve-* *
+      - Expand-* *
+      - Compress-* *
+      - Split-* *
+      - Join-* *
+      - Merge-* *
+      - Sync-* *
+      - Push-* *
+      - Pop-* *
+      - Debug-* *
+      - Trace-* *
+      - Assert-* *
+      - Confirm-* *
+      - Suspend-* *
+      - Resume-* *
+      - Restart-* *
+      - Reset-* *
+      - Protect-* *
+      - Unprotect-* *
+      - Block-* *
+      - Unblock-* *
+      - Grant-* *
+      - Revoke-* *
+      - Lock-* *
+      - Unlock-* *
+      - Mount-* *
+      - Dismount-* *
+      - Connect-* *
+      - Disconnect-* *
+
+      # === 变量和表达式 ===
+      - "& *"
+      - $* *
+      - "[*]*"
+      - "(*)*"
+      - if *
+      - else *
+      - elseif *
+      - switch *
+      - for *
+      - foreach *
+      - while *
+      - do *
+      - try *
+      - catch *
+      - finally *
+      - throw *
+      - return *
+      - break *
+      - continue *
+
+      # === 其他常用 ===
+      - exit *
+      - quit *
+      - bye *
+      - logout *
+      - sleep *
+
+    effect: allow
+
+  # ========== 其他能力 ==========
+  - capability: fs_read
+    effect: allow
+
+  - capability: fs_write
+    effect: allow
+
+  - capability: web_fetch
+    effect: allow
+
+  - capability: web_search
+    effect: allow
+
+  - capability: skill
+    effect: allow
+
+  - capability: subagent
+    effect: allow
+
+  - capability: mcp
+    effect: allow
+
+  - capability: context
+    effect: allow
+
+  - capability: diagnostics
+    effect: allow
+
+  - capability: power
+    effect: allow
